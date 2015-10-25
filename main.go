@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/mgutz/ansi"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -69,6 +70,15 @@ func RunApp(dir string, from string, to string, c *cli.Context) {
 }
 
 func ProcessFile(filePath string, from string, to string) {
+
+	//Colors to be used on the console
+	red := ansi.ColorCode("red+bh")
+	white := ansi.ColorCode("white+bh")
+	greenUnderline := ansi.ColorCode("green+buh")
+	blackOnWhite := ansi.ColorCode("black+b:white+h")
+	//Reset the color
+	reset := ansi.ColorCode("reset")
+
 	// If the file is a go file scan it
 	if path.Ext(filePath) == ".go" {
 		// New FileSet to parse the go file to
@@ -100,7 +110,7 @@ func ProcessFile(filePath string, from string, to string) {
 					// Join the path of the import package with the remainder from the old one after removing the old import package
 					replacePackage := path.Join(to, strings.Replace(importString, from, "", -1))
 
-					fmt.Println("Updating import " + importString + " from file " + filePath + " to " + replacePackage)
+					fmt.Println(red + "Updating import " + importString + " from file " + reset + white + filePath + reset + red + " to " + reset + white + replacePackage + reset)
 
 					// Remove the old import and replace it with the replacement
 					astutil.DeleteImport(fSet, file, importString)
@@ -116,10 +126,9 @@ func ProcessFile(filePath string, from string, to string) {
 			printer.Fprint(&outputBuffer, fSet, file)
 
 			ioutil.WriteFile(filePath, outputBuffer.Bytes(), os.ModePerm)
-
-			fmt.Printf("File "+filePath+" saved after %d changes.\n", numChanges)
+			fmt.Printf(blackOnWhite+"File "+filePath+" saved after %d changes."+reset+"\n", numChanges)
 		} else {
-			fmt.Println("No changes needed on file " + filePath)
+			fmt.Println(greenUnderline + "No changes needed on file " + filePath + reset)
 		}
 	}
 }
