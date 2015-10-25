@@ -14,7 +14,9 @@ Getting started with gomove is really easy. If you have a proper `$GOPATH` setup
 
     $ go get -u github.com/ksubedi/gomove
 
-Once you have the gomove tool on your path, using it is really easy. First, move your package directory to the new directory and run gomove tool.
+You can also download pre-built binary files and debian packages from the [releases page](https://github.com/KSubedi/gomove/releases).
+
+Once you have the gomove installed, using it is really easy. First, move your package directory to the new directory and run gomove tool.
 
 In this example, we are moving package `github.com/ksubedi/go-web-seed` to `github.com/ksubedi/new-project`. First we move the first directory to the second one, then we can do the following to automatically update the imports:
 
