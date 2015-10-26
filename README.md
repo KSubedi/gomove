@@ -6,6 +6,8 @@ gomove
 
 ----------
 
+**Warning: The current version of this tool will strip all the comments from the source code. It is a limitation with golang's ast parser and I am working on another implementation that will leave the comments as well.**
+
 
 Getting Started
 -------------
