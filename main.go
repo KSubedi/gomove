@@ -28,6 +28,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "safe-mode, s",
+			Value: "false",
 			Usage: "run program in safe mode (comments will be wiped)",
 		},
 	}
