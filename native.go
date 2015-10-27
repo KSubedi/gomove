@@ -52,17 +52,20 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
-			numChages++
+			if line != newImport {
+				numChages++
 
-			fmt.Println(red+"Updating "+
-				reset+white+
-				line+
-				reset+red+
-				" to "+
-				reset+white+
-				newImport+
-				reset+red+
-				"on line", scanLine, reset)
+				fmt.Println(red+"Updating "+
+					reset+white+
+					line+
+					reset+red+
+					" to "+
+					reset+white+
+					newImport+
+					reset+red+
+					"on line", scanLine, reset)
+			}
+
 			continue
 		}
 
@@ -79,16 +82,19 @@ func ProcessFileNative(filePath string, from string, to string) {
 		if isImportLine {
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
-			numChages++
-			fmt.Println(red+"Updating import "+
-				reset+white+
-				line+
-				reset+red+
-				"to"+
-				reset+white+
-				newImport+
-				reset+red+
-				"on line", scanLine, reset)
+			if line != newImport {
+				numChages++
+				fmt.Println(red+"Updating text "+
+					reset+white+
+					line+
+					reset+red+
+					" to "+
+					reset+white+
+					newImport+
+					reset+red+
+					" on line", scanLine, reset)
+
+			}
 			continue
 		}
 
