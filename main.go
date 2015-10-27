@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
@@ -36,7 +37,7 @@ func main() {
 		if file != "" {
 			ProcessFileNative(file, from, to)
 		} else {
-			RunApp(dir, from, to, c)
+			ScanDir(dir, from, to, c)
 		}
 
 	}
@@ -44,11 +45,17 @@ func main() {
 	app.Run(os.Args)
 }
 
-func RunApp(dir string, from string, to string, c *cli.Context) {
+// ScanDir scans a directory for go files and
+func ScanDir(dir string, from string, to string, c *cli.Context) {
 
+	// If from and to are not empty scan all files
 	if from != "" && to != "" {
+		// Scan directory for files
 		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
-			ProcessFileNative(filePath, from, to)
+			// Only process go files
+			if path.Ext(filePath) == ".go" {
+				ProcessFileNative(filePath, from, to)
+			}
 			return nil
 		})
 
