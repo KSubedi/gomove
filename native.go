@@ -7,9 +7,18 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/mgutz/ansi"
 )
 
 func ProcessFileNative(filePath string, from string, to string) {
+	//Colors to be used on the console
+	red := ansi.ColorCode("red+bh")
+	white := ansi.ColorCode("white+bh")
+	greenUnderline := ansi.ColorCode("green+buh")
+	blackOnWhite := ansi.ColorCode("black+b:white+h")
+	//Reset the color
+	reset := ansi.ColorCode("reset")
 
 	// Open file to read
 	fileContent, err := ioutil.ReadFile(filePath)
@@ -40,28 +49,46 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 		// If it is a single import statement, replace the path in that line
 		if strings.Contains(bareLine, "import\"") {
-			fmt.Println("Found Import On Line", scanLine)
+
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
 			numChages++
+
+			fmt.Println(red+"Updating "+
+				reset+white+
+				line+
+				reset+red+
+				" to "+
+				reset+white+
+				newImport+
+				reset+red+
+				"on line", scanLine, reset)
 			continue
 		}
 
 		// Change isImportLine accordingly if import statements are detected
 		if strings.Contains(bareLine, "import(") {
-			fmt.Println("Found Multiple Imports Starting On Line", scanLine)
+			fmt.Println(greenUnderline+"Found Multiple Imports Starting On Line", scanLine, reset)
 			isImportLine = true
 		} else if isImportLine && strings.Contains(bareLine, ")") {
-			fmt.Println("Imports Finish On Line", scanLine)
+			fmt.Println(greenUnderline+"Imports Finish On Line", scanLine, reset)
 			isImportLine = false
 		}
 
 		// If it is a import line, replace the import
 		if isImportLine {
 			newImport := strings.Replace(line, from, to, -1)
-			fmt.Println("Replacing", line, "to", newImport, "on line", scanLine)
 			output += newImport + "\n"
 			numChages++
+			fmt.Println(red+"Updating import "+
+				reset+white+
+				line+
+				reset+red+
+				"to"+
+				reset+white+
+				newImport+
+				reset+red+
+				"on line", scanLine, reset)
 			continue
 		}
 
@@ -72,6 +99,13 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	// Only write if changes were made
 	if numChages > 0 {
+		fmt.Println(blackOnWhite+
+			"File",
+			filePath,
+			"saved after",
+			numChages,
+			"changes",
+			reset)
 		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
 	}
 }
