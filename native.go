@@ -57,11 +57,11 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 				fmt.Println(red+"Updating "+
 					reset+white+
-					line+
+					strings.TrimSpace(line)+
 					reset+red+
 					" to "+
 					reset+white+
-					newImport+
+					strings.TrimSpace(newImport)+
 					reset+red+
 					"on line", scanLine, reset)
 			}
@@ -86,11 +86,11 @@ func ProcessFileNative(filePath string, from string, to string) {
 				numChages++
 				fmt.Println(red+"Updating text "+
 					reset+white+
-					line+
+					strings.TrimSpace(line)+
 					reset+red+
 					" to "+
 					reset+white+
-					newImport+
+					strings.TrimSpace(newImport)+
 					reset+red+
 					" on line", scanLine, reset)
 
