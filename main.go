@@ -12,7 +12,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "gomove"
 	app.Usage = "Move Golang packages to a new path."
-	app.Version = "0.0.1"
+	app.Version = "0.2.17"
 	app.ArgsUsage = "[old path] [new path]"
 	app.Author = "Kaushal Subedi <kaushal@subedi.co>"
 
