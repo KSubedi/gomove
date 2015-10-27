@@ -16,7 +16,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 	red := ansi.ColorCode("red+bh")
 	white := ansi.ColorCode("white+bh")
 	green := ansi.ColorCode("green+bh")
-	blue := ansi.ColorCode("blue+bh")
+	yellow := ansi.ColorCode("yellow+bh")
 	blackOnWhite := ansi.ColorCode("black+b:white+h")
 	//Reset the color
 	reset := ansi.ColorCode("reset")
@@ -108,13 +108,17 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	// Only write if changes were made
 	if numChages > 0 {
-		fmt.Println(blue+
+		fmt.Println(yellow+
 			"File",
 			filePath,
 			"saved after",
 			numChages,
 			"changes",
-			reset)
+			reset, "\n\n")
 		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
+	} else {
+		fmt.Println(yellow+
+			"No changes to write on this file.",
+			reset, "\n\n")
 	}
 }
