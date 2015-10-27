@@ -155,7 +155,7 @@ func ProcessFileAST(filePath string, from string, to string) {
 		for _, mPackage := range imports {
 			for _, mImport := range mPackage {
 				// Since astutil returns the path string with quotes, remove those
-				importString := strings.Replace(mImport.Path.Value, "\"", "", -1)
+				importString := mImport.Path.Value
 
 				// If the path matches the oldpath, replace it with the new one
 				if strings.Contains(importString, from) {
@@ -163,7 +163,7 @@ func ProcessFileAST(filePath string, from string, to string) {
 					numChanges++
 
 					// Join the path of the import package with the remainder from the old one after removing the old import package
-					replacePackage := path.Join(to, strings.Replace(importString, from, "", -1))
+					replacePackage := strings.Replace(importString, from, to, -1)
 
 					fmt.Println(red + "Updating import " + importString + " from file " + reset + white + filePath + reset + red + " to " + reset + white + replacePackage + reset)
 
