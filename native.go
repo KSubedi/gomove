@@ -15,10 +15,13 @@ func ProcessFileNative(filePath string, from string, to string) {
 	//Colors to be used on the console
 	red := ansi.ColorCode("red+bh")
 	white := ansi.ColorCode("white+bh")
-	greenUnderline := ansi.ColorCode("green+buh")
+	green := ansi.ColorCode("green+bh")
+	blue := ansi.ColorCode("blue+bh")
 	blackOnWhite := ansi.ColorCode("black+b:white+h")
 	//Reset the color
 	reset := ansi.ColorCode("reset")
+
+	fmt.Pritnln(blackOnWhite+"Processing file", filePath, reset)
 
 	// Open file to read
 	fileContent, err := ioutil.ReadFile(filePath)
@@ -71,10 +74,10 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 		// Change isImportLine accordingly if import statements are detected
 		if strings.Contains(bareLine, "import(") {
-			fmt.Println(greenUnderline+"Found Multiple Imports Starting On Line", scanLine, reset)
+			fmt.Println(green+"Found Multiple Imports Starting On Line", scanLine, reset)
 			isImportLine = true
 		} else if isImportLine && strings.Contains(bareLine, ")") {
-			fmt.Println(greenUnderline+"Imports Finish On Line", scanLine, reset)
+			fmt.Println(green+"Imports Finish On Line", scanLine, reset)
 			isImportLine = false
 		}
 
@@ -105,7 +108,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	// Only write if changes were made
 	if numChages > 0 {
-		fmt.Println(blackOnWhite+
+		fmt.Println(blue+
 			"File",
 			filePath,
 			"saved after",
