@@ -26,6 +26,10 @@ func main() {
 			Name:  "file, f",
 			Usage: "only move imports in a file",
 		},
+		cli.StringFlag{
+			Name:  "safe-mode, s",
+			Usage: "run program in safe mode (comments will be wiped)",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -35,7 +39,7 @@ func main() {
 		to := c.Args().Get(1)
 
 		if file != "" {
-			ProcessFileNative(file, from, to)
+			ProcessFile(file, from, to, c)
 		} else {
 			ScanDir(dir, from, to, c)
 		}
@@ -54,7 +58,7 @@ func ScanDir(dir string, from string, to string, c *cli.Context) {
 		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
 			// Only process go files
 			if path.Ext(filePath) == ".go" {
-				ProcessFileNative(filePath, from, to)
+				ProcessFile(filePath, from, to, c)
 			}
 			return nil
 		})
@@ -63,4 +67,13 @@ func ScanDir(dir string, from string, to string, c *cli.Context) {
 		cli.ShowAppHelp(c)
 	}
 
+}
+
+// ProcessFile processes file according to what mode is chosen
+func ProcessFile(filePath string, from string, to string, c *cli.Context) {
+	if c.String("safe-mode") == "true" {
+		ProcessFileAST(filePath, from, to)
+	} else {
+		ProcessFileNative(filePath, from, to)
+	}
 }
