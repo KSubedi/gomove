@@ -53,7 +53,17 @@ func ProcessFileAST(filePath string, from string, to string) {
 				// Join the path of the import package with the remainder from the old one after removing the old import package
 				replacePackage := strings.Replace(importString, from, to, -1)
 
-				fmt.Println(red + "Updating import " + importString + " from file " + reset + white + filePath + reset + red + " to " + reset + white + replacePackage + reset)
+				fmt.Println(red +
+					"Updating import " +
+					importString +
+					" from file " +
+					reset + white +
+					filePath +
+					reset + red +
+					" to " +
+					reset + white +
+					replacePackage +
+					reset)
 
 				// Remove the old import and replace it with the replacement
 				astutil.DeleteImport(fSet, file, importString)
@@ -69,7 +79,11 @@ func ProcessFileAST(filePath string, from string, to string) {
 		printer.Fprint(&outputBuffer, fSet, file)
 
 		ioutil.WriteFile(filePath, outputBuffer.Bytes(), os.ModePerm)
-		fmt.Printf(blackOnWhite+"File "+filePath+" saved after %d changes."+reset+"\n", numChanges)
+		fmt.Printf(blackOnWhite+
+			"File "+
+			filePath+
+			" saved after %d changes."+
+			reset+"\n", numChanges)
 	} else {
 		fmt.Println(greenUnderline + "No changes needed on file " + filePath + reset)
 	}
