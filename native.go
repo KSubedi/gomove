@@ -35,7 +35,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 	// Track line that is being scanned
 	scanLine := 0
 	// Track number of changes in file
-	numChages := 0
+	numChanges := 0
 
 	// Control variables
 	isImportLine := false
@@ -56,7 +56,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
 			if line != newImport {
-				numChages++
+				numChanges++
 
 				fmt.Println(red+"Updating "+
 					reset+white+
@@ -86,7 +86,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
 			if line != newImport {
-				numChages++
+				numChanges++
 				fmt.Println(red+"Updating text "+
 					reset+white+
 					strings.TrimSpace(line)+
@@ -107,12 +107,12 @@ func ProcessFileNative(filePath string, from string, to string) {
 	}
 
 	// Only write if changes were made
-	if numChages > 0 {
+	if numChanges > 0 {
 		fmt.Println(yellow+
 			"File",
 			filePath,
 			"saved after",
-			numChages,
+			numChanges,
 			"changes",
 			reset, "\n\n")
 		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)

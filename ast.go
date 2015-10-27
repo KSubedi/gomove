@@ -19,14 +19,12 @@ func ProcessFileAST(filePath string, from string, to string) {
 	//Colors to be used on the console
 	red := ansi.ColorCode("red+bh")
 	white := ansi.ColorCode("white+bh")
-	greenUnderline := ansi.ColorCode("green+buh")
+	yellow := ansi.ColorCode("yellow+bh")
 	blackOnWhite := ansi.ColorCode("black+b:white+h")
 	//Reset the color
 	reset := ansi.ColorCode("reset")
 
-	fmt.Println(blackOnWhite +
-		"RUNNING IN SAFE MODE" +
-		reset)
+	fmt.Println(blackOnWhite+"Processing file", filePath, "in SAFE MODE", reset)
 
 	// New FileSet to parse the go file to
 	fSet := token.NewFileSet()
@@ -47,7 +45,7 @@ func ProcessFileAST(filePath string, from string, to string) {
 	for _, mPackage := range imports {
 		for _, mImport := range mPackage {
 			// Since astutil returns the path string with quotes, remove those
-			importString := mImport.Path.Value
+			importString := strings.TrimSuffix(strings.TrimPrefix(mImport.Path.Value, "\""), "\"")
 
 			// If the path matches the oldpath, replace it with the new one
 			if strings.Contains(importString, from) {
@@ -59,10 +57,8 @@ func ProcessFileAST(filePath string, from string, to string) {
 
 				fmt.Println(red +
 					"Updating import " +
-					importString +
-					" from file " +
 					reset + white +
-					filePath +
+					importString +
 					reset + red +
 					" to " +
 					reset + white +
@@ -83,12 +79,16 @@ func ProcessFileAST(filePath string, from string, to string) {
 		printer.Fprint(&outputBuffer, fSet, file)
 
 		ioutil.WriteFile(filePath, outputBuffer.Bytes(), os.ModePerm)
-		fmt.Printf(blackOnWhite+
-			"File "+
-			filePath+
-			" saved after %d changes."+
-			reset+"\n", numChanges)
+		fmt.Println(yellow+
+			"File",
+			filePath,
+			"saved after",
+			numChanges,
+			"changes",
+			reset, "\n\n")
 	} else {
-		fmt.Println(greenUnderline + "No changes needed on file " + filePath + reset)
+		fmt.Println(yellow+
+			"No changes to write on this file.",
+			reset, "\n\n")
 	}
 }
