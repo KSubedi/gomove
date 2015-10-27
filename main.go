@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"go/parser"
@@ -45,7 +46,7 @@ func main() {
 		to := c.Args().Get(1)
 
 		if file != "" {
-			ProcessFile(file, from, to)
+			ProcessFileNative(file, from, to)
 		} else {
 			RunApp(dir, from, to, c)
 		}
@@ -59,7 +60,7 @@ func RunApp(dir string, from string, to string, c *cli.Context) {
 
 	if from != "" && to != "" {
 		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
-			ProcessFile(filePath, from, to)
+			ProcessFileNative(filePath, from, to)
 			return nil
 		})
 
@@ -69,7 +70,61 @@ func RunApp(dir string, from string, to string, c *cli.Context) {
 
 }
 
-func ProcessFile(filePath string, from string, to string) {
+func ProcessFileNative(filePath string, from string, to string) {
+
+	fileContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(fileContent))
+	scanLine := 0
+
+	isImportLine := false
+
+	output := ""
+
+	// Scan through the lines of go file
+	for scanner.Scan() {
+
+		scanLine++
+		line := scanner.Text()
+		bareLine := strings.Replace(line, " ", "", -1)
+
+		// If it is a single import statement, replace the path in that line
+		if strings.Contains(bareLine, "import\"") {
+			fmt.Println("Found Import On Line", scanLine)
+			newImport := strings.Replace(line, from, to, -1)
+			output += newImport + "\n"
+			continue
+		}
+
+		// Change isImportLine accordingly if import statements are detected
+		if strings.Contains(bareLine, "import(") {
+			fmt.Println("Found Multiple Imports Starting On Line", scanLine)
+			isImportLine = true
+		} else if isImportLine && strings.Contains(bareLine, ")") {
+			fmt.Println("Imports Finish On Line", scanLine)
+			isImportLine = false
+		}
+
+		// If it is a import line, replace the import
+		if isImportLine {
+			newImport := strings.Replace(line, from, to, -1)
+			fmt.Println("Replacing", line, "to", newImport, "on line", scanLine)
+			output += newImport + "\n"
+			continue
+		}
+
+		// Just copy the rest of the lines to the output
+		output += line + "\n"
+
+	}
+
+	ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
+}
+
+func ProcessFileAST(filePath string, from string, to string) {
 
 	//Colors to be used on the console
 	red := ansi.ColorCode("red+bh")
