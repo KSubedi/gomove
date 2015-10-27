@@ -72,17 +72,24 @@ func RunApp(dir string, from string, to string, c *cli.Context) {
 
 func ProcessFileNative(filePath string, from string, to string) {
 
+	// Open file to read
 	fileContent, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	// Scan file line by line
 	scanner := bufio.NewScanner(bytes.NewReader(fileContent))
+
+	// Track line that is being scanned
 	scanLine := 0
+	// Track number of changes in file
 	numChages := 0
 
+	// Control variables
 	isImportLine := false
 
+	// Store final output text
 	output := ""
 
 	// Scan through the lines of go file
