@@ -6,9 +6,6 @@ gomove
 
 ----------
 
-**Warning: The current version of this tool will strip all the comments from the source code. It is a limitation with golang's ast parser and I am working on another implementation that will leave the comments as well.**
-
-
 Getting Started
 -------------
 
@@ -37,12 +34,12 @@ You can also run `gomove --help` for help.
 	$ gomove --help
 	NAME:
 	   gomove - Move Golang packages to a new path.
-	
+
 	USAGE:
-	   gomove command [command options] [old path] [new path]
+	   gomove [global options] command [command options] [old path] [new path]
 	   
 	VERSION:
-	   0.0.1
+	   0.2.17
 	   
 	AUTHOR(S):
 	   Kaushal Subedi <kaushal@subedi.co> 
@@ -51,10 +48,19 @@ You can also run `gomove --help` for help.
 	   help, h	Shows a list of commands or help for one command
 	   
 	GLOBAL OPTIONS:
-	   --dir, -d "./"	directory to scan
-	   --file, -f 		only move imports in a file
-	   --help, -h		show help
-	   --version, -v	print the version
+	   --dir, -d "./"		directory to scan
+	   --file, -f 			only move imports in a file
+	   --safe-mode, -s "false"	run program in safe mode (comments will be wiped)
+	   --help, -h			show help
+	   --version, -v		print the version
+
+
+Safe Mode
+-------------
+By default this tool uses something called native mode where it scans through the go files, finds import statements and replaces the package names. However if you want to use a more safe way of changing the import statements, you can use Safe Mode which parses the ast tree of the go file and replaces imports from there. The biggest downside to using this is that it will remove all the comments from go files and also prettify your files. To use it in safe mode set the `--safe-mode` or `-s` flag to true:
+    
+    gomove --safe-mode true github.com/bla/bla github.com/foo/bar
+
 
 License
 -------------
