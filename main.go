@@ -79,6 +79,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	scanner := bufio.NewScanner(bytes.NewReader(fileContent))
 	scanLine := 0
+	numChages := 0
 
 	isImportLine := false
 
@@ -96,6 +97,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 			fmt.Println("Found Import On Line", scanLine)
 			newImport := strings.Replace(line, from, to, -1)
 			output += newImport + "\n"
+			numChages++
 			continue
 		}
 
@@ -113,6 +115,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 			newImport := strings.Replace(line, from, to, -1)
 			fmt.Println("Replacing", line, "to", newImport, "on line", scanLine)
 			output += newImport + "\n"
+			numChages++
 			continue
 		}
 
@@ -121,7 +124,10 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	}
 
-	ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
+	// Only write if changes were made
+	if numChages > 0 {
+		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
+	}
 }
 
 func ProcessFileAST(filePath string, from string, to string) {
