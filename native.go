@@ -21,7 +21,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 	//Reset the color
 	reset := ansi.ColorCode("reset")
 
-	fmt.Pritnln(blackOnWhite+"Processing file", filePath, reset)
+	fmt.Println(blackOnWhite+"Processing file", filePath, reset)
 
 	// Open file to read
 	fileContent, err := ioutil.ReadFile(filePath)
