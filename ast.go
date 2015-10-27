@@ -24,6 +24,10 @@ func ProcessFileAST(filePath string, from string, to string) {
 	//Reset the color
 	reset := ansi.ColorCode("reset")
 
+	fmt.Println(blackOnWhite +
+		"RUNNING IN SAFE MODE" +
+		reset)
+
 	// New FileSet to parse the go file to
 	fSet := token.NewFileSet()
 
