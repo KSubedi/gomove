@@ -11,6 +11,7 @@ import (
 	"github.com/mgutz/ansi"
 )
 
+// ProcessFileNative processes files uing native string search instead of ast parsing
 func ProcessFileNative(filePath string, from string, to string) {
 	//Colors to be used on the console
 	red := ansi.ColorCode("red+bh")

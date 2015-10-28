@@ -14,6 +14,7 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
+// ProcessFileAST processes the files using golang's AST parser
 func ProcessFileAST(filePath string, from string, to string) {
 
 	//Colors to be used on the console
