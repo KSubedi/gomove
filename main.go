@@ -57,10 +57,15 @@ func ScanDir(dir string, from string, to string, c *cli.Context) {
 	if from != "" && to != "" {
 		// Scan directory for files
 		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
+			// ignore vendor path
+			if matched, _ := path.Match("vendor/*", filePath); matched {
+				return nil
+			}
 			// Only process go files
 			if path.Ext(filePath) == ".go" {
 				ProcessFile(filePath, from, to, c)
 			}
+
 			return nil
 		})
 
