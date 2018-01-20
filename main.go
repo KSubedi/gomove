@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/codegangsta/cli"
 )
@@ -52,13 +53,14 @@ func main() {
 
 // ScanDir scans a directory for go files and
 func ScanDir(dir string, from string, to string, c *cli.Context) {
-
 	// If from and to are not empty scan all files
 	if from != "" && to != "" {
+		// construct the path of the vendor dir of the project for prefix matching
+		vendorDir := path.Join(dir, "vendor")
 		// Scan directory for files
 		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
 			// ignore vendor path
-			if matched, _ := path.Match("vendor/*", filePath); matched {
+			if matched := strings.HasPrefix(filePath, vendorDir); matched {
 				return nil
 			}
 			// Only process go files
