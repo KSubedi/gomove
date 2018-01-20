@@ -20,7 +20,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "dir, d",
 			Value: "./",
-			Usage: "directory to scan",
+			Usage: "directory to scan. files under vendor/ are ignored",
 		},
 		cli.StringFlag{
 			Name:  "file, f",
