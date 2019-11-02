@@ -8,7 +8,6 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/mgutz/ansi"
 	"golang.org/x/tools/go/ast/astutil"
@@ -31,61 +30,44 @@ func ProcessFileAST(filePath string, from string, to string) {
 	fSet := token.NewFileSet()
 
 	// Parse the file
-	file, err := parser.ParseFile(fSet, filePath, nil, 0)
+	file, err := parser.ParseFile(fSet, filePath, nil, parser.ParseComments)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	// Get the list of imports from the ast
-	imports := astutil.Imports(fSet, file)
-
 	// Keep track of number of changes
-	numChanges := 0
-
-	// Iterate through the imports array
-	for _, mPackage := range imports {
-		for _, mImport := range mPackage {
-			// Since astutil returns the path string with quotes, remove those
-			importString := strings.TrimSuffix(strings.TrimPrefix(mImport.Path.Value, "\""), "\"")
-
-			// If the path matches the oldpath, replace it with the new one
-			if strings.Contains(importString, from) {
-				//If it needs to be replaced, increase numChanges so we can write the file later
-				numChanges++
-
-				// Join the path of the import package with the remainder from the old one after removing the old import package
-				replacePackage := strings.Replace(importString, from, to, -1)
-
-				fmt.Println(red +
-					"Updating import " +
-					reset + white +
-					importString +
-					reset + red +
-					" to " +
-					reset + white +
-					replacePackage +
-					reset)
-
-				// Remove the old import and replace it with the replacement
-				astutil.DeleteImport(fSet, file, importString)
-				astutil.AddImport(fSet, file, replacePackage)
-			}
-		}
+	changed := false
+	if changed = astutil.RewriteImport(fSet, file, from, to); changed {
+		fmt.Println(red +
+			"Updating import " +
+			reset + white +
+			from +
+			reset + red +
+			" to " +
+			reset + white +
+			to +
+			reset)
 	}
 
 	// If the number of changes are more than 0, write file
-	if numChanges > 0 {
-		// Print the new AST tree to a new output buffer
+	if changed {
+		// Print the new AST tree to a new output buffer. These Config settings intended to match gofmt.
+		printerMode := printer.TabIndent | printer.UseSpaces
+		printConfig := &printer.Config{Mode: printerMode, Tabwidth: 8}
+
 		var outputBuffer bytes.Buffer
-		printer.Fprint(&outputBuffer, fSet, file)
+		err := printConfig.Fprint(&outputBuffer, fSet, file)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		ioutil.WriteFile(filePath, outputBuffer.Bytes(), os.ModePerm)
 		fmt.Println(yellow+
 			"File",
 			filePath,
-			"saved after",
-			numChanges,
-			"changes",
+			"saved",
 			reset, "\n\n")
 	} else {
 		fmt.Println(yellow+
