@@ -57,7 +57,7 @@ You can also run `gomove --help` for help.
 
 Safe Mode
 -------------
-By default this tool uses something called native mode where it scans through the go files, finds import statements and replaces the package names. However if you want to use a more safe way of changing the import statements, you can use Safe Mode which parses the ast tree of the go file and replaces imports from there. The biggest downside to using this is that it will remove all the comments from go files and also prettify your files. To use it in safe mode set the `--safe-mode` or `-s` flag to true:
+By default this tool uses something called native mode where it scans through the go files, finds import statements and replaces the package names. However if you want to use a more safe way of changing the import statements, you can use Safe Mode which parses the ast tree of the go file and replaces imports from there. The biggest downside to using this is that it will [prettify](https://godoc.org/github.com/golang/go/src/cmd/gofmt) your files. To use it in safe mode set the `--safe-mode` or `-s` flag to true:
     
     gomove --safe-mode true github.com/bla/bla github.com/foo/bar
 
