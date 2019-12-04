@@ -64,14 +64,14 @@ func ProcessFileAST(filePath string, from string, to string) {
 		}
 
 		ioutil.WriteFile(filePath, outputBuffer.Bytes(), os.ModePerm)
-		fmt.Println(yellow+
+		fmt.Print(yellow+
 			"File",
 			filePath,
 			"saved",
-			reset, "\n\n")
+			reset, "\n\n\n")
 	} else {
-		fmt.Println(yellow+
+		fmt.Print(yellow+
 			"No changes to write on this file.",
-			reset, "\n\n")
+			reset, "\n\n\n")
 	}
 }

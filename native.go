@@ -109,17 +109,17 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 	// Only write if changes were made
 	if numChanges > 0 {
-		fmt.Println(yellow+
+		fmt.Print(yellow+
 			"File",
 			filePath,
 			"saved after",
 			numChanges,
 			"changes",
-			reset, "\n\n")
+			reset, "\n\n\n")
 		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
 	} else {
-		fmt.Println(yellow+
+		fmt.Print(yellow+
 			"No changes to write on this file.",
-			reset, "\n\n")
+			reset, "\n\n\n")
 	}
 }
