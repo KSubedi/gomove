@@ -49,6 +49,7 @@ You can also run `gomove --help` for help.
 	   
 	GLOBAL OPTIONS:
 	   --dir, -d "./"		directory to scan
+	   --conf, c			lookup config for multiple dependency changes
 	   --file, -f 			only move imports in a file
 	   --safe-mode, -s "false"	run program in safe mode (comments will be wiped)
 	   --help, -h			show help

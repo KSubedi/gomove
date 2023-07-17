@@ -11,18 +11,19 @@ import (
 	"github.com/mgutz/ansi"
 )
 
-// ProcessFileNative processes files uing native string search instead of ast parsing
+var (
+	red          = ansi.ColorCode("red+bh")
+	white        = ansi.ColorCode("white+bh")
+	green        = ansi.ColorCode("green+bh")
+	yellow       = ansi.ColorCode("yellow+bh")
+	blackOnWhite = ansi.ColorCode("black+b:white+h")
+	//Reset the color
+	reset = ansi.ColorCode("reset")
+)
+
+// ProcessFileNative processes files using native string search instead of ast parsing
 func ProcessFileNative(filePath string, from string, to string) {
 	//Colors to be used on the console
-	red := ansi.ColorCode("red+bh")
-	white := ansi.ColorCode("white+bh")
-	green := ansi.ColorCode("green+bh")
-	yellow := ansi.ColorCode("yellow+bh")
-	blackOnWhite := ansi.ColorCode("black+b:white+h")
-	//Reset the color
-	reset := ansi.ColorCode("reset")
-
-	fmt.Println(blackOnWhite+"Processing file", filePath, reset)
 
 	// Open file to read
 	fileContent, err := ioutil.ReadFile(filePath)
@@ -75,10 +76,10 @@ func ProcessFileNative(filePath string, from string, to string) {
 
 		// Change isImportLine accordingly if import statements are detected
 		if strings.Contains(bareLine, "import(") {
-			fmt.Println(green+"Found Multiple Imports Starting On Line", scanLine, reset)
+			//	fmt.Println(green+"Found Multiple Imports Starting On Line", scanLine, reset)
 			isImportLine = true
 		} else if isImportLine && strings.Contains(bareLine, ")") {
-			fmt.Println(green+"Imports Finish On Line", scanLine, reset)
+			//	fmt.Println(green+"Imports Finish On Line", scanLine, reset)
 			isImportLine = false
 		}
 
@@ -112,14 +113,14 @@ func ProcessFileNative(filePath string, from string, to string) {
 		fmt.Print(yellow+
 			"File",
 			filePath,
-			"saved after",
+			"saved after ",
 			numChanges,
-			"changes",
-			reset, "\n\n\n")
+			" changes",
+			reset, "\n")
 		ioutil.WriteFile(filePath, []byte(output), os.ModePerm)
-	} else {
+	} /* else {
 		fmt.Print(yellow+
 			"No changes to write on this file.",
-			reset, "\n\n\n")
-	}
+			reset, "\n\n\")
+	} */
 }
