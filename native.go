@@ -113,7 +113,7 @@ func ProcessFileNative(filePath string, from string, to string) {
 		fmt.Print(yellow+
 			"File",
 			filePath,
-			"saved after ",
+			" saved after ",
 			numChanges,
 			" changes",
 			reset, "\n")
@@ -123,4 +123,41 @@ func ProcessFileNative(filePath string, from string, to string) {
 			"No changes to write on this file.",
 			reset, "\n\n\")
 	} */
+}
+
+// replaceFile goes through a non go file and does a direct replacement of the lookup[from][to] values provided.
+// it returns a list of keys that were replaced.
+func replaceFile(path string, deleteLines bool, lookup map[string]string) ([]string, error) {
+	foundKeys := make(map[string]struct{})
+	file, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("open file %v: %w", path, err)
+	}
+	scanner := bufio.NewScanner(bytes.NewReader(file))
+	output := ""
+	numChanges := 0
+loop:
+	for scanLine := 0; scanner.Scan(); scanLine++ {
+		line := scanner.Text()
+		for k, v := range lookup {
+			if strings.Contains(line, k) {
+				numChanges++
+				foundKeys[k] = struct{}{}
+				if deleteLines {
+					line = ""
+					continue loop
+				}
+				line = strings.ReplaceAll(line, k, v)
+			}
+
+		}
+		output += line + "\n"
+	}
+	err = os.WriteFile(path, []byte(output), os.ModePerm)
+
+	replaceValues := make([]string, 0, len(foundKeys))
+	for k, _ := range foundKeys {
+		replaceValues = append(replaceValues, k)
+	}
+	return replaceValues, err
 }

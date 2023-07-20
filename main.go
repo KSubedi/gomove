@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -74,7 +72,7 @@ func main() {
 		if file != "" {
 			ProcessFile(file, from, to, c)
 		} else {
-			ParseMod(dir, lookup)
+			//ParseMod(dir, lookup)
 			ScanDir(dir, lookup, c)
 		}
 
@@ -93,85 +91,50 @@ func ScanDir(dir string, lookup map[string]string, c *cli.Context) {
 		if matched := strings.HasPrefix(filePath, vendorDir); matched {
 			return nil
 		}
+		// skip directories and .git folder
+		if info.IsDir() || strings.Contains(filePath, "/.git/") {
+			return nil
+		}
+		// skip executable files
+		if info.Mode()&0111 != 0 {
+			fmt.Printf("Skip executable %v %b\n", filePath, info.Mode())
+			return nil
+		}
+
+		// delete checksum values in go.sum file
+		if info.Name() == "go.sum" {
+
+			if v, err := replaceFile(filePath, true, lookup); err != nil {
+				log.Println(err)
+			} else if len(v) > 0 {
+				fmt.Println(red+"deleting checksums in ", blackOnWhite, filePath, reset)
+				fmt.Println(red, v, reset)
+			}
+
+		}
 		// Only process go files
 		if path.Ext(filePath) == ".go" {
 			fmt.Println(blackOnWhite+"Processing file", filePath, reset)
 			for from, to := range lookup {
 				ProcessFile(filePath, from, to, c)
 			}
+			return nil
+		}
+
+		v, err := replaceFile(filePath, false, lookup)
+		if len(v) > 0 {
+			fmt.Println(blackOnWhite+"Updated file", filePath, reset)
+			for _, k := range v {
+				fmt.Print(red, k, " -> ", green, lookup[k], reset)
+			}
+			fmt.Println()
+		}
+		if err != nil {
+			log.Println(err)
 		}
 
 		return nil
 	})
-}
-
-// ParseMod goes through the go.mod and go.sum file
-// it will optimize the lookup map by removing values not found in the
-// go.mod file.
-func ParseMod(dir string, lookup map[string]string) {
-	foundKeys := make(map[string]string)
-	modPath := strings.TrimRight(dir, "/") + "/go.mod"
-	modFile, err := os.ReadFile(modPath)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	sumPath := strings.TrimRight(dir, "/") + "/go.sum"
-	sumFile, err := os.ReadFile(sumPath)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	numChanges := 0
-	output := ""
-	scanner := bufio.NewScanner(bytes.NewReader(modFile))
-modScan:
-	for scanLine := 0; scanner.Scan(); scanLine++ {
-		line := scanner.Text()
-
-		for key, value := range lookup {
-			if strings.Contains(line, key) {
-				numChanges++
-				foundKeys[key] = value
-				output += strings.Replace(line, key, value, 1) + "\n"
-				continue modScan
-			}
-		}
-		output += line + "\n"
-	}
-	// remove unneeded keys
-	for k := range lookup {
-		if _, found := foundKeys[k]; !found {
-			fmt.Printf("Remove unused key: %v\n", k)
-			delete(lookup, k)
-		}
-	}
-
-	if numChanges > 0 {
-		os.WriteFile(modPath, []byte(output), os.ModePerm)
-	}
-
-	// update go.sum file
-	numChanges = 0
-	output = ""
-	scanner = bufio.NewScanner(bytes.NewReader(sumFile))
-sumScan:
-	for scanLine := 0; scanner.Scan(); scanLine++ {
-		line := scanner.Text()
-
-		for key, _ := range lookup {
-			if strings.Contains(line, key) {
-				numChanges++
-				continue sumScan
-			}
-		}
-		output += line + "\n"
-	}
-	if numChanges > 0 {
-		os.WriteFile(sumPath, []byte(output), os.ModePerm)
-	}
 }
 
 // ProcessFile processes file according to what mode is chosen
