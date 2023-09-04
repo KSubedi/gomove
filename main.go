@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -24,6 +27,11 @@ func main() {
 			Usage: "directory to scan. files under vendor/ are ignored",
 		},
 		cli.StringFlag{
+			Name:  "conf, c",
+			Value: "",
+			Usage: "json lookup config for updating multiple paths at the same time",
+		},
+		cli.StringFlag{
 			Name:  "file, f",
 			Usage: "only move imports in a file",
 		},
@@ -35,15 +43,37 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		lookup := make(map[string]string)
 		file := c.String("file")
 		dir := c.String("dir")
+		conf := c.String("conf")
+
 		from := c.Args().Get(0)
 		to := c.Args().Get(1)
+
+		if conf != "" {
+			b, err := os.ReadFile(conf)
+			if err != nil {
+				log.Fatalf("error reading file %v: %v", conf, err)
+			}
+			if err := json.Unmarshal(b, &lookup); err != nil {
+				log.Fatalf("error parsing file %v: %v", conf, err)
+			}
+
+		} else if from == "" || to == "" {
+			cli.ShowAppHelp(c)
+			log.Println("is this needed?")
+			return
+
+		} else {
+			lookup = map[string]string{from: to}
+		}
 
 		if file != "" {
 			ProcessFile(file, from, to, c)
 		} else {
-			ScanDir(dir, from, to, c)
+			//ParseMod(dir, lookup)
+			ScanDir(dir, lookup, c)
 		}
 
 	}
@@ -52,29 +82,59 @@ func main() {
 }
 
 // ScanDir scans a directory for go files and
-func ScanDir(dir string, from string, to string, c *cli.Context) {
-	// If from and to are not empty scan all files
-	if from != "" && to != "" {
-		// construct the path of the vendor dir of the project for prefix matching
-		vendorDir := path.Join(dir, "vendor")
-		// Scan directory for files
-		filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
-			// ignore vendor path
-			if matched := strings.HasPrefix(filePath, vendorDir); matched {
-				return nil
+func ScanDir(dir string, lookup map[string]string, c *cli.Context) {
+	// construct the path of the vendor dir of the project for prefix matching
+	vendorDir := path.Join(dir, "vendor")
+	// Scan directory for files
+	filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
+		// ignore vendor path
+		if matched := strings.HasPrefix(filePath, vendorDir); matched {
+			return nil
+		}
+		// skip directories and .git folder
+		if info.IsDir() || strings.Contains(filePath, "/.git/") {
+			return nil
+		}
+		// skip executable files
+		if info.Mode()&0111 != 0 {
+			fmt.Printf("Skip executable %v %b\n", filePath, info.Mode())
+			return nil
+		}
+
+		// delete checksum values in go.sum file
+		if info.Name() == "go.sum" {
+
+			if v, err := replaceFile(filePath, true, lookup); err != nil {
+				log.Println(err)
+			} else if len(v) > 0 {
+				fmt.Println(red+"deleting checksums in ", blackOnWhite, filePath, reset)
+				fmt.Println(red, v, reset)
 			}
-			// Only process go files
-			if path.Ext(filePath) == ".go" {
+
+		}
+		// Only process go files
+		if path.Ext(filePath) == ".go" {
+			fmt.Println(blackOnWhite+"Processing file", filePath, reset)
+			for from, to := range lookup {
 				ProcessFile(filePath, from, to, c)
 			}
-
 			return nil
-		})
+		}
 
-	} else {
-		cli.ShowAppHelp(c)
-	}
+		v, err := replaceFile(filePath, false, lookup)
+		if len(v) > 0 {
+			fmt.Println(blackOnWhite+"Updated file", filePath, reset)
+			for _, k := range v {
+				fmt.Print(red, k, " -> ", green, lookup[k], reset)
+			}
+			fmt.Println()
+		}
+		if err != nil {
+			log.Println(err)
+		}
 
+		return nil
+	})
 }
 
 // ProcessFile processes file according to what mode is chosen
